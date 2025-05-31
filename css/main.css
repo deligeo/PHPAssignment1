@@ -1,3 +1,4 @@
+
 * {
   margin: 0;
   padding: 0;
@@ -6,8 +7,203 @@
 }
 
 body {
-  font-family: 'Poppins';
+  min-height: 100vh;
+  background-color: #fffef2;
+  font-family: "Sniglet", system-ui;
   font-size: 1.2em;
-  background: #edeac9;
-  color: #000;
+  padding-left: 180px;
+  padding-right: 180px;
+  padding-top: 50px;
+  background: 
+    linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+    url(../images/bookBg.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.rainbow-title {
+  text-align: center;
+  padding-top: 50px;
+  margin-bottom: 20px;
+  font-family: "Chewy", system-ui;
+  letter-spacing: 0.07em;
+  font-size: 4em;
+}
+
+.rainbow-title span:nth-child(5n+1) { color: #32bfc4; }
+.rainbow-title span:nth-child(5n+2) { color: #a6c15f; }
+.rainbow-title span:nth-child(5n+3) { color: #ea4370; }
+.rainbow-title span:nth-child(5n+4) { color: #ea9240; }
+.rainbow-title span:nth-child(5n+5) { color: #eac51c; }
+
+
+h2 {
+  font-family: "Chewy", system-ui;
+  letter-spacing: 0.07em;
+  font-size: 2em;
+  padding-bottom: 40px;
+  color: #e51aca;
+  text-align: center;
+}
+
+p {
+  text-align: center; 
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  border: 1px solid #c858e4;;
+}
+
+
+th, td {
+  padding: 14px;
+  border: 1px solid #c858e4;;
+  text-align: center;
+  color: #463b3b;
+}
+
+th {
+  font-family: "Chewy", system-ui;
+  font-size: 1.3em;
+  letter-spacing: 0.07em;
+  background-color: #efafff;
+  color: #c858e4;
+  border: 1.5px solid #c858e4;;
+  z-index: 3;
+}
+
+tr{
+  background-color: #fff;
+}
+
+tr:hover {
+  background-color: #f7eeff;
+  transition: background-color 0.2s ease;
+}
+
+tr form input[type="submit"] {
+    font-family: "Sniglet", system-ui;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    background-color: #de7cf6;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.8em;
+    border-radius: 20px;
+    transition: transform 0.25s ease;
+}
+
+#addBook {
+  text-align: center; 
+  background-color: #ffe6ff;
+  padding: 30px;
+}
+
+#addBook a {
+  text-decoration: none;
+  background-color: #de7cf6;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.8em;
+  border-radius: 20px;
+}
+
+#addBook a:hover {
+  background-color: #9e17c0;
+}
+
+footer > p {
+  padding: 30px;
+  font-size: 0.7em;
+}
+
+/*****************/
+
+
+form {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+#data {
+  width: 100%;
+  align-items: center;
+}
+
+label {
+  display: inline-block;
+  width: 175px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #9e17c0;
+}
+
+input[type="text"] {
+  width: calc(100% - 800px);
+  padding: 8px;
+  margin: 0 auto 15px auto;
+  border: 2px solid #c858e4;
+  border-radius: 6px;
+  font-size: 0.95em;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #f368e0;
+  outline: none;
+}
+
+input[type="file"] {
+  display: inline-block;
+  padding: 10px 12px;
+  border: 2px dashed #c858e4;
+  border-radius: 10px;
+  background-color: #fef6ff;
+  font-family: "Sniglet", system-ui;
+  font-size: 0.9em;
+  color: #9e17c0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+input[type="file"]:hover {
+  background-color: #f8e7ff;
+  border-color: #9e17c0;
+  color: #de7cf6;
+}
+
+#buttons {
+  width: 100%;
+  align-items: center;
+}
+
+#buttons input[type="submit"] {
+  font-family: "Sniglet", system-ui;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  background-color: #f368e0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.9em;
+  border-radius: 20px;
+  transition: transform 0.25s ease;
+  margin: 20px auto 20px auto;
+}
+
+#buttons input[type="submit"]:hover {
+  background-color: #9e17c0;
+  transform: scale(1.025);
+}
+
+#viewBook {
+  text-align: center;
+  margin-top: 30px;
 }
