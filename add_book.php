@@ -1,4 +1,5 @@
 <?php
+
     session_start();
 
     require_once 'image_util.php'; // the process_image function
@@ -32,8 +33,16 @@
     $year = filter_input(INPUT_POST, 'year');
     $pages = filter_input(INPUT_POST, 'pages'); // assigns the value of the selected radio button
     $price = filter_input(INPUT_POST, 'price');
-    $image_name = $_FILES['file1']['name'];
+    
+    $type_id = filter_input(INPUT_POST, 'type_id', FILTER_VALIDATE_INT);
 
+    $file_name = $_FILES['file1']['name'];
+
+    $i = strrpos($file_name, '.');
+    $image_name = substr($file_name, 0, $i);
+    $ext = substr($file_name, $i);
+    $image_name_100 = $image_name . '_100' . $ext;
+    
     require_once('database.php');
     $queryBooks = 'SELECT * FROM books';
     $statement1 = $db->prepare($queryBooks);
@@ -56,7 +65,7 @@
 
     if ($title == null || $author == null ||
         $isbn == null || $year == null ||
-        $price == null)
+        $price == null || $type_id === false)
     {
         $_SESSION["add_error"] = "Invalid book data, Check all fields and try again.";
 
@@ -66,14 +75,11 @@
     }
     else
     {        
-
-        require_once('database.php');
-
         // Add the book to the database
         $query = 'INSERT INTO books
-            (title, author, isbn, year, pages, price, imageName)
+            (title, author, isbn, year, pages, price, imageName, typeID)
             VALUES
-            (:title, :author, :isbn, :year, :pages, :price, :imageName)';
+            (:title, :author, :isbn, :year, :pages, :price, :imageName, :typeID)';
 
         $statement = $db->prepare($query);
         $statement->bindValue(':title', $title);
@@ -82,8 +88,9 @@
         $statement->bindValue(':year', $year);
         $statement->bindValue(':pages', $pages);
         $statement->bindValue(':price', $price);
-        $statement->bindValue(':imageName', $image_name);
-
+        $statement->bindValue(':imageName', $image_name_100);
+        $statement->bindValue(':typeID', $type_id);
+        
         $statement->execute();
         $statement->closeCursor();
 

@@ -12,6 +12,13 @@
         $statement->execute();
         $book = $statement->fetch();
         $statement->closeCursor();
+
+        // Get book types
+        $queryTypes = 'SELECT * FROM types';
+        $statement2 = $db->prepare($queryTypes);
+        $statement2->execute();
+        $types = $statement2->fetchAll();
+        $statement2->closeCursor();
 ?>
 <!DOCTYPE html>
 <html>
@@ -60,6 +67,23 @@
                     <label>Price:</label>
                     <input type="text" name="price"
                         value="<?php echo $book['price']; ?>" /><br />
+
+                    <label>Book Type:</label>
+                    <select name="type_id">
+                        <?php foreach ($types as $type): ?>
+                            <option value="<?php echo $type['typeID']; ?>" <?php if ($type['typeID'] == $book['typeID']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($type['bookType']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select><br />
+
+                    <?php if (!empty($book['imageName'])): ?>
+                        <label>Current Image:</label>
+                        <img src="images/<?php echo htmlspecialchars($book['imageName']); ?>" height="100"><br />
+                    <?php endif; ?>
+
+                    <label>Update Image:</label>
+                    <input type="file" name="image"><br />
 
                 </div>
 

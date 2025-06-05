@@ -50,7 +50,6 @@ p {
   text-align: center; 
 }
 
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -206,4 +205,32 @@ input[type="file"]:hover {
 #viewBook {
   text-align: center;
   margin-top: 30px;
+}
+
+#logOut {
+  text-align: center;
+  margin-top: 30px;
+  font-family: "Sniglet", system-ui;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  background: #de7cf6;
+  color: #fff;
+  border: none;
+  padding: 10px 5px;
+  font-size: 0.9em;
+  border-radius: 20px;
+  transition: transform 0.25s ease;
+  margin: 20px auto 20px auto;
+  width: 120px;
+}
+
+#logout a {
+  text-decoration: none;
+  color: #fff;
+}
+
+#logOut:hover {
+  background-color: #9e17c0;
+  transform: scale(1.025);
+  color: #fff;
 }

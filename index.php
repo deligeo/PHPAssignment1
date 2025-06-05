@@ -1,8 +1,19 @@
 
 <?php
     session_start();
+
+    if (!isset($_SESSION["isLoggedIn"])) {
+        header("Location: login_form.php");
+        die();
+    }
+
     require("database.php");
-    $queryBooks = 'SELECT * FROM books';
+    $queryBooks = '
+        SELECT b.*, t.bookType
+        FROM books b
+        LEFT JOIN types t ON b.typeID = t.typeID
+    ';
+
     $statement1 = $db->prepare($queryBooks);
     $statement1->execute();
     $books = $statement1->fetchAll();
@@ -35,40 +46,42 @@
                 <th>Pages</th>
                 <th>Price</th>
                 <th>Photo</th>
-                <th>&nbsp;</th> <!-- for edit button -->
+                <th>&nbsp;</th> <!-- for update button -->
                 <th>&nbsp;</th> <!-- for delete button -->
             </tr>
 
             <?php foreach ($books as $book):?>
                 <tr>
-                    <td><?php echo $book['title'];?></td>
-                    <td><?php echo $book['author'];?></td>
-                    <td><?php echo $book['isbn'];?></td>
-                    <td><?php echo $book['year'];?></td>
-                    <td><?php echo $book['pages'];?></td>
-                    <td><?php echo $book['price'];?></td>
-                    <td><img src="<?php echo htmlspecialchars('./images/' . $book['imageName']); ?>" alt="<?php echo htmlspecialchars('./images/' . $book['imageName']);?>" style="width:100px; height:auto;" /></td>
-                        <td>
-                            <form action="update_book_form.php" method="post">
-                                <input type="hidden" name="book_id"
-                                    value="<?php echo $book['bookID']; ?>" />
-                                <input type="submit" value="Update" />
-                            </form>
-                        </td> <!-- for edit button -->
-                        <td>
-                            <form action="delete_book.php" method="post">
-                                <input type="hidden" name="book_id"
-                                    value="<?php echo $book['bookID']; ?>" />
-                                <input type="submit" value="Delete" />
-                            </form>
-                        </td> <!-- for delete button -->
-                    </tr>
+                
+                    <td><?php echo htmlspecialchars($book['title']);?></td>
+                    <td><?php echo htmlspecialchars($book['author']);?></td>
+                    <td><?php echo htmlspecialchars($book['isbn']);?></td>
+                    <td><?php echo htmlspecialchars($book['year']);?></td>
+                    <td><?php echo htmlspecialchars($book['pages']);?></td>
+                    <td><?php echo htmlspecialchars($book['price']);?></td>
+                    <td><img src="<?php echo htmlspecialchars('./images/' . $book['imageName']); ?>" 
+                             alt="<?php echo htmlspecialchars('./images/' . $book['imageName']);?>" /></td>
+                    <td>
+                        <form action="update_book_form.php" method="post">
+                            <input type="hidden" name="book_id"
+                                value="<?php echo $book['bookID']; ?>" />
+                            <input type="submit" value="Update" />
+                        </form>
+                    </td> <!-- for update button -->
+                    <td>
+                        <form action="delete_book.php" method="post">
+                            <input type="hidden" name="book_id"
+                                value="<?php echo $book['bookID']; ?>" />
+                            <input type="submit" value="Delete" />
+                        </form>
+                    </td> <!-- for delete button -->
                 </tr>
             <?php endforeach; ?>
             <td colspan="9" id="addBook">
                 <a href="add_book_form.php">Add Book</a>
             </td>
         </table>
+        <p id="logOut"><a href="logout.php">Logout</a></p>
     </main>
     <?php include ("footer.php"); ?>
 </body>
