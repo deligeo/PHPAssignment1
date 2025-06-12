@@ -48,6 +48,7 @@
                 <th>Photo</th>
                 <th>&nbsp;</th> <!-- for update button -->
                 <th>&nbsp;</th> <!-- for delete button -->
+                <th>&nbsp;</th> <!-- for view details -->
             </tr>
 
             <?php foreach ($books as $book):?>
@@ -75,9 +76,15 @@
                             <input type="submit" value="Delete" />
                         </form>
                     </td> <!-- for delete button -->
+                    <td>
+                        <form action="book_details.php" method="post">
+                            <input type="hidden" name="book_id" value="<?php echo $book['bookID']; ?>" />
+                            <input type="submit" value="View Details" />
+                        </form>
+                        </td>
                 </tr>
             <?php endforeach; ?>
-            <td colspan="9" id="addBook">
+            <td colspan="10" id="addBook">
                 <a href="add_book_form.php">Add Book</a>
             </td>
         </table>

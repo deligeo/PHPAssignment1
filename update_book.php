@@ -1,126 +1,121 @@
 <?php
-    session_start();
+session_start();
 
-    $book_id = filter_input(INPUT_POST, 'book_id', FILTER_VALIDATE_INT);
+require_once('database.php');
+require_once('image_util.php');
 
-    // get data from the form
-    $title = filter_input(INPUT_POST, 'title');
-    // alternative
-    // $title = $_POST['title'];
-    $author = filter_input(INPUT_POST, 'author');
-    $isbn = filter_input(INPUT_POST, 'isbn');
-    $year = filter_input(INPUT_POST, 'year');
-    $pages = filter_input(INPUT_POST, 'pages'); // assigns the value of the selected radio button
-    $price = filter_input(INPUT_POST, 'price');
+// Get book ID
+$book_id = filter_input(INPUT_POST, 'book_id', FILTER_VALIDATE_INT);
 
-    $type_id = filter_input(INPUT_POST, 'type_id', FILTER_VALIDATE_INT);
-    $image = $_FILES['image'];
-    
-    require_once('database.php');
-    $queryBooks = 'SELECT * FROM books';
-    $statement1 = $db->prepare($queryBooks);
-    $statement1->execute();
-    $books = $statement1->fetchAll();
-    $statement1->closeCursor();
+// Get other form data
+$title = filter_input(INPUT_POST, 'title');
+$author = filter_input(INPUT_POST, 'author');
+$isbn = filter_input(INPUT_POST, 'isbn');
+$year = filter_input(INPUT_POST, 'year');
+$pages = filter_input(INPUT_POST, 'pages');
+$price = filter_input(INPUT_POST, 'price');
+$type_id = filter_input(INPUT_POST, 'type_id', FILTER_VALIDATE_INT);
 
-    foreach ($books as $book)
-    {
-        if ($title == $book["title"] && ($book_id) != ($book["bookID"]))
-        {
-            $_SESSION["add_error"] = "Invalid data, Duplicate Book. Try again.";
+// Get uploaded image (if any)
+$image = $_FILES['image'];
 
-            $url = "error.php";
-            header("Location: " . $url);
-            die();
-        }
-    }
+// Get current book record to check current image name
+$query = 'SELECT * FROM books WHERE bookID = :bookID';
+$statement = $db->prepare($query);
+$statement->bindValue(':bookID', $book_id);
+$statement->execute();
+$book = $statement->fetch();
+$statement->closeCursor();
 
-    if ($title == null || $author == null ||
-        $isbn == null || $year == null ||
-        $price == null || $type_id === null) 
+$old_image_name = $book['imageName'];
+$base_dir = 'images/';
+$image_name = $old_image_name;
 
-    {
-        $_SESSION["add_error"] = "Invalid book data, Check all fields and try again.";
+// Check for duplicate ISBN in other books
+$queryBooks = 'SELECT * FROM books';
+$statement1 = $db->prepare($queryBooks);
+$statement1->execute();
+$books = $statement1->fetchAll();
+$statement1->closeCursor();
 
-        $url = "error.php";
-        header("Location: " . $url);
+foreach ($books as $b) {
+    if ($isbn == $b["isbn"] && $book_id != $b["bookID"]) {
+        $_SESSION["add_error"] = "Invalid data, Duplicate ISBN. Try again.";
+        header("Location: error.php");
         die();
     }
+}
 
-    require_once('image_util.php');
+// Validate input
+if ($title == null || $author == null || $isbn == null ||
+    $year == null || $pages == null || $price == null || $type_id == null) {
+    $_SESSION["add_error"] = "Invalid book data. Check all fields and try again.";
+    header("Location: error.php");
+    die();
+}
 
-    // Get current image name from database
-    $query = 'SELECT imageName FROM books WHERE bookID = :bookID';
-    $statement = $db->prepare($query);
-    $statement->bindValue(':bookID', $book_id);
-    $statement->execute();
-    $current = $statement->fetch();
-    $current_image_name = $current['imageName'];
-    $statement->closeCursor();
+// If new image is uploaded
+if ($image && $image['error'] === UPLOAD_ERR_OK) {
+    $original_filename = basename($image['name']);
+    $upload_path = $base_dir . $original_filename;
 
-    $image_name = $current_image_name;
+    move_uploaded_file($image['tmp_name'], $upload_path);
 
-    if ($image && $image['error'] === UPLOAD_ERR_OK) {
-        // Delete old image files if they exist
-        $base_dir = 'images/';
-        if ($current_image_name) {
-            $dot = strrpos($current_image_name, '_100.');
-            if ($dot !== false) {
-                $original_name = substr($current_image_name, 0, $dot) . substr($current_image_name, $dot + 4);
-                $original = $base_dir . $original_name;
-                $img_100 = $base_dir . $current_image_name;
-                $img_400 = $base_dir . substr($current_image_name, 0, $dot) . '_400' . substr($current_image_name, $dot + 4);
+    // Process and create _100 and _400 versions
+    process_image($base_dir, $original_filename);
 
-                if (file_exists($original)) unlink($original);
-                if (file_exists($img_100)) unlink($img_100);
-                if (file_exists($img_400)) unlink($img_400);
+    // Create new image name with _100
+    $dot_pos = strrpos($original_filename, '.');
+    $new_image_name = substr($original_filename, 0, $dot_pos) . '_100' . substr($original_filename, $dot_pos);
+    $image_name = $new_image_name;
+
+    // Delete old images if they are not the placeholder
+    if ($old_image_name !== 'placeholder_100.jpg') {
+        $old_base = substr($old_image_name, 0, strrpos($old_image_name, '_100'));
+        $old_ext = substr($old_image_name, strrpos($old_image_name, '.'));
+        $original = $old_base . $old_ext;
+        $img100 = $old_base . '_100' . $old_ext;
+        $img400 = $old_base . '_400' . $old_ext;
+
+        foreach ([$original, $img100, $img400] as $file) {
+            $path = $base_dir . $file;
+            if (file_exists($path)) {
+                unlink($path);
             }
         }
-
-        // Upload and process new image
-        $original_filename = basename($image['name']);
-        $upload_path = $base_dir . $original_filename;
-        move_uploaded_file($image['tmp_name'], $upload_path);
-        process_image($base_dir, $original_filename);
-
-        // Save new _100 filename for database
-        $dot_position = strrpos($original_filename, '.');
-        $name_without_ext = substr($original_filename, 0, $dot_position);
-        $extension = substr($original_filename, $dot_position);
-        $image_name = $name_without_ext . '_100' . $extension;
     }
+}
 
-        // Update the book in the database
-        $query = 'UPDATE books
-            SET title = :title,
-            author = :author,
-            isbn = :isbn,
-            year = :year,
-            pages = :pages,
-            price =:price,
-            typeID = :typeID,
-            imageName = :imageName
-            WHERE bookID = :bookID';
+// Update book in database
+$update_query = '
+    UPDATE books
+    SET title = :title,
+        author = :author,
+        isbn = :isbn,
+        year = :year,
+        pages = :pages,
+        price = :price,
+        typeID = :typeID,
+        imageName = :imageName
+    WHERE bookID = :bookID';
 
-        $statement = $db->prepare($query);
-        $statement->bindValue(':bookID', $book_id);
-        $statement->bindValue(':title', $title);
-        $statement->bindValue(':author', $author);
-        $statement->bindValue(':isbn', $isbn);
-        $statement->bindValue(':year', $year);
-        $statement->bindValue(':pages', $pages);
-        $statement->bindValue(':price', $price);
-        $statement->bindValue(':typeID', $type_id);
-        $statement->bindValue(':imageName', $image_name);
+$statement = $db->prepare($update_query);
+$statement->bindValue(':title', $title);
+$statement->bindValue(':author', $author);
+$statement->bindValue(':isbn', $isbn);
+$statement->bindValue(':year', $year);
+$statement->bindValue(':pages', $pages);
+$statement->bindValue(':price', $price);
+$statement->bindValue(':typeID', $type_id);
+$statement->bindValue(':imageName', $image_name);
+$statement->bindValue(':bookID', $book_id);
+$statement->execute();
+$statement->closeCursor();
 
-        $statement->execute();
-        $statement->closeCursor();
+// Store book title for confirmation message
+$_SESSION["bookName"] = $title;
 
-    $_SESSION["bookName"] = $title;
-
-    // redirect to confirmation page
-    $url = "update_confirmation.php";
-    header("Location: " . $url);
-    die(); // releases add_book.php from memory
-
+// Redirect to confirmation
+header("Location: update_confirmation.php");
+die();
 ?>
