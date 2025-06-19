@@ -15,7 +15,6 @@ $statement->closeCursor();
 
 if ($row) {
     $now = new DateTime();
-    // echo $now;
     $last_failed = new DateTime($row['last_failed_login']);
     $interval = $now->getTimestamp() - $last_failed->getTimestamp();
 
@@ -26,6 +25,18 @@ if ($row) {
         $_SESSION['locked_user'] = $user_name;
         header("Location: login_form.php");
         exit;
+    }
+
+    else if ($row['failed_attempts'] >= 3 && $interval >= 300) {
+        $query = "UPDATE registrations SET failed_attempts = 0, last_failed_login = NULL WHERE userName = :userName";
+        $statement = $db->prepare($query);
+        $statement->bindValue(':userName', $user_name);
+        $statement->execute();
+        $statement->closeCursor();
+
+        // Also update the $row values so that later checks use the correct state
+        $row['failed_attempts'] = 0;
+        $row['last_failed_login'] = null;
     }
 
     if (password_verify($password, $row['password'])) {
